@@ -14,13 +14,13 @@ var emojis = {
     '(y)': '<img alt="👍" class="emoji emojiordered0884" src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7">'
 };
 
-var lastReactid = '';
+var lastInput = null;
 
 var checkInterval = setInterval(function() {
-    var inputTmp = document.querySelector('div[contenteditable]'), reactid;
-    if (inputTmp && (reactid = inputTmp.dataset.reactid) != lastReactid) {
-        setup(inputTmp, reactid);
-        lastReactid = reactid;
+    var inputTmp = document.querySelector('div[contenteditable]');
+    if (inputTmp && inputTmp != lastInput) {
+        setup(inputTmp);
+        lastInput = inputTmp;
     }
 
     // The send button besides input
