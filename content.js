@@ -1,16 +1,18 @@
 // List of Emojis supported and their HTML representation for WhatsApp
 var emojis = {
-    ':)': '<img alt="" class="emoji emojiordered1163" src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7">',
-    ':P': '<img alt="" class="emoji emojiordered1181" src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7">',
-    ':D': '<img alt="😀" class="emoji emojiordered1153" src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7">',
-    ';)': '<img alt="" class="emoji emojiordered1162" src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7">',
-    ':(': '<img alt="" class="emoji emojiordered1171" src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7">',
-    ":'(": '<img alt="" class="emoji emojiordered1190" src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7">',
-    ':/': '<img alt="😕" class="emoji emojiordered1174" src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7">',
-    ':o': '<img alt="😮" class="emoji emojiordered1199" src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7">',
-    '-_-': '<img alt="😑" class="emoji emojiordered1170" src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7">',
-    '(y)': '<img alt="" class="emoji emojiordered0733" src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7">'
-}
+    ':)': '<img alt="😊" class="emoji emojiordered1369" src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7">',
+    ":')": '<img alt="😅" class="emoji emojiordered1364"src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7">',
+    ':P': '<img alt="😜" class="emoji emojiordered1387" src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7">',
+    ':D': '<img alt="😀" class="emoji emojiordered1359" src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7">',
+    ';)': '<img alt="😉" class="emoji emojiordered1368" src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7">',
+    ':(': '<img alt="😒" class="emoji emojiordered1377" src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7">',
+    ":'(": '<img alt="😥" class="emoji emojiordered1396" src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7">',
+    ':/': '<img alt="😕" class="emoji emojiordered1380" src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7">',
+    ':o': '<img alt="😮" class="emoji emojiordered1405" src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7">',
+    '-_-': '<img alt="😑" class="emoji emojiordered1376" src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7">',
+    ':|': '<img alt="😐" class="emoji emojiordered1375" src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7">',
+    '(y)': '<img alt="👍" class="emoji emojiordered0884" src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7">'
+};
 
 var lastReactid = '';
 
@@ -32,23 +34,44 @@ function setup(input) {
     input.addEventListener('keydown', function(e) {
         if (e.which == 13 && !e.shiftKey) {
             // Convert when pressed enter without shift
-            convert();
+            convert(false);
         }
-    })
+    });
+    input.addEventListener('keyup', function(e) {
+        convert(true);
+    });
 }
 
 function escapeRegExp(str) {
   return str.replace(/[\-\[\]\/\{\}\(\)\*\+\?\.\\\^\$\|]/g, "\\$&");
 }
 
-function convert() {
+function convert(isOnline) {
     var input = document.querySelector('div[contenteditable]');
+
+    // Save cursor position, by adding \uffff
+    var handleCursor = false;
+
+    var selections = window.getSelection();
+    var range = selections.getRangeAt(0);
+
+    if (!range.collapsed) {
+        // Something is selected, do nothing
+        return;
+    }
+
+    var cursorNode = range.startContainer;
+    if (isOnline && input.contains(cursorNode)) {
+        document.execCommand('insertText', false, '\uffff');
+        handleCursor = true;
+    }
+
+    // Replace ASCII Emojis with images
     var val = input.innerHTML;
-    var reg, replace;
-    for (ascii in emojis) {
-        replace = true;
+    var reg, replace, ascii_reg;
+    for (var ascii in emojis) {
         ascii_reg = escapeRegExp(ascii);
-        while (replace) {
+        do {
             replace = false;
 
             reg = new RegExp('(\\s)'+ascii_reg+'(\\s)');
@@ -59,25 +82,55 @@ function convert() {
             if (val.match(reg)) replace = true;
             val = val.replace(reg, emojis[ascii]+'$1');
 
-            reg = new RegExp('(\\s)'+ascii_reg+'$');
-            if (val.match(reg)) replace = true;
-            val = val.replace(reg, '$1'+emojis[ascii]);
+            if (!isOnline) {
+                // Run these only when the message is sent, not while writing
 
-            reg = new RegExp('^'+ascii_reg+'$');
-            if (val.match(reg)) replace = true;
-            val = val.replace(reg, emojis[ascii]);
-        }
+                reg = new RegExp('(\\s)'+ascii_reg+'$');
+                if (val.match(reg)) replace = true;
+                val = val.replace(reg, '$1'+emojis[ascii]);
+
+                reg = new RegExp('^'+ascii_reg+'$');
+                if (val.match(reg)) replace = true;
+                val = val.replace(reg, emojis[ascii]);
+            }
+        } while (replace);
     }
 
     input.innerHTML = val;
 
-    // To trick WhatsApp to consider converted values
-    input.innerHTML += ' ';
-    var range = document.createRange();
-    range.selectNodeContents(input);
-    range.collapse(false);
-    var sel = window.getSelection();
-    sel.removeAllRanges();
-    sel.addRange(range);
-    document.execCommand('delete');
+    if (handleCursor) {
+        // Position cursor at the original place
+        selections.removeAllRanges();
+
+        var walk = document.createTreeWalker(
+            input,
+            NodeFilter.SHOW_TEXT,
+            null,
+            false
+        );
+
+        var node, offset;
+        while ((node = walk.nextNode()) !== null) {
+            if ((offset = node.textContent.indexOf('\uffff')) > -1) {
+                range = document.createRange();
+                range.setStart(node, offset);
+                range.setEnd(node, offset + 1);
+                selections.addRange(range);
+                document.execCommand('delete');
+            }
+        }
+    } else if (!isOnline) {
+        // To trick WhatsApp to consider converted values
+        input.innerHTML += ' ';
+
+        range = document.createRange();
+        range.selectNodeContents(input);
+        range.collapse(false);
+
+        selections.removeAllRanges();
+        selections.addRange(range);
+        document.execCommand('delete');
+    }
 }
+
+console.log("WhatsApp Web Emoji Converter Loaded!");
