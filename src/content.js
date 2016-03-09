@@ -46,6 +46,31 @@ function escapeRegExp(str) {
   return str.replace(/[\-\[\]\/\{\}\(\)\*\+\?\.\\\^\$\|]/g, "\\$&");
 }
 
+function replaceEmoji(text, isOnline, dryRun) {
+    var origText = text;
+
+    var reg, ascii_reg;
+    for (var ascii in emojis) {
+        ascii_reg = escapeRegExp(ascii);
+
+        reg = new RegExp('(^|\\s)'+ascii_reg+'(\\s)', 'g');
+        text = text.replace(reg, '$1'+emojis[ascii]+'$2');
+
+        if (!isOnline) {
+            // Run these only when the message is sent, not while writing
+
+            reg = new RegExp('(^|\\s)'+ascii_reg+'$', 'g');
+            text = text.replace(reg, '$1'+emojis[ascii]);
+        }
+    }
+
+    if (dryRun) {
+        return text !== origText;
+    }
+
+    return text;
+}
+
 function convert(isOnline) {
     var input = document.querySelector('div[contenteditable]');
 
@@ -60,6 +85,10 @@ function convert(isOnline) {
         return;
     }
 
+    if (!replaceEmoji(input.innerHTML, isOnline, true)) {
+        return;
+    }
+
     var cursorNode = range.startContainer;
     if (isOnline && input.contains(cursorNode)) {
         document.execCommand('insertText', false, '\uffff');
@@ -67,34 +96,7 @@ function convert(isOnline) {
     }
 
     // Replace ASCII Emojis with images
-    var val = input.innerHTML;
-    var reg, replace, ascii_reg;
-    for (var ascii in emojis) {
-        ascii_reg = escapeRegExp(ascii);
-        do {
-            replace = false;
-
-            reg = new RegExp('(\\s)'+ascii_reg+'(\\s)');
-            if (val.match(reg)) replace = true;
-            val = val.replace(reg, '$1'+emojis[ascii]+'$2');
-
-            reg = new RegExp('^'+ascii_reg+'(\\s)');
-            if (val.match(reg)) replace = true;
-            val = val.replace(reg, emojis[ascii]+'$1');
-
-            if (!isOnline) {
-                // Run these only when the message is sent, not while writing
-
-                reg = new RegExp('(\\s)'+ascii_reg+'$');
-                if (val.match(reg)) replace = true;
-                val = val.replace(reg, '$1'+emojis[ascii]);
-
-                reg = new RegExp('^'+ascii_reg+'$');
-                if (val.match(reg)) replace = true;
-                val = val.replace(reg, emojis[ascii]);
-            }
-        } while (replace);
-    }
+    var val = replaceEmoji(input.innerHTML, isOnline);
 
     input.innerHTML = val;
 
