@@ -135,4 +135,53 @@ function convert(isOnline) {
     }
 }
 
+const input = document.querySelector("footer div[contenteditable]");
+const container = input.parentElement.parentElement;
+
+const toolbar = document.createElement("div");
+toolbar.className = "waFormatToolbar";
+
+const addBtn = (label, handler) => {
+  const btn = document.createElement("button");
+  btn.innerHTML = label;
+  btn.addEventListener("click", handler);
+  toolbar.appendChild(btn);
+};
+
+const enclose =
+  (open, close = open) =>
+  () => {
+    document.execCommand("insertText", false, `${open}${window.getSelection()}${close}`);
+  };
+addBtn("•", () => document.execCommand("insertText", false, "•"));
+addBtn("<strong>B</strong>", enclose('*'));
+addBtn("<i>I</i>", enclose('_'));
+addBtn("<strike>S</strike>", enclose('~'));
+addBtn("()", enclose('(',')'));
+
+container.insertBefore(toolbar, container.firstChild);
+
+const stylesheet = document.createElement("style");
+stylesheet.innerHTML = `
+.waFormatToolbar{
+  background: #555;
+  border-top-left-radius: 15px;
+  margin: -10px -14px 10px;
+  padding-left: 10px;
+  border-top-right-radius: 15px;
+}
+.waFormatToolbar button{
+  background:white;
+  height: 20px;
+  width:20px;
+  border-radius:4px;
+  margin: 5px 2px;
+}
+.waFormatToolbar i{
+  font-style: italic;
+}
+`;
+
+document.head.appendChild(stylesheet);
+
 console.log("WhatsApp Web Emoji Converter Loaded!");
