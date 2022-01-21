@@ -1,7 +1,7 @@
 {
-    "name": "WhatsApp Web Emoji Converter",
-    "description": "Convert ASCII smileys to WhatsApp emojis in WhatsApp Web",
-    "version": "0.3",
+    "name": "WhatsApp Web Format Toolbar",
+    "description": "Add a formatting toolbar including underline and fancy fonts for WhatsApp Web and automatically convert ascii smileys to emojis.",
+    "version": "1.0",
     "permissions": [
         "https://web.whatsapp.com/"
     ],
